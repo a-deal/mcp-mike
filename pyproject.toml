@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-mike"
+version = "0.1.0"
+description = "Mike's personal MCP server for Claude Desktop"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+]
+
+[project.scripts]
+mcp-mike = "mcp_mike.server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
