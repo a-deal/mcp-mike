@@ -19,6 +19,9 @@ from mcp_mike.tools import (
     quiz_me,
     mark_concept,
     progress,
+    mochary,
+    duke,
+    komoroske,
     whats_next,
     save_note,
     _get_progress,
@@ -285,3 +288,74 @@ def test_progress_after_learning(workspace):
     mark_concept("supervision-gap", "correct")
     result = progress("learnair")
     assert "1/" in result  # 1 started
+
+
+# --- mochary ---
+
+def test_mochary_meeting_prep():
+    result = mochary("meeting prep with Justin tomorrow")
+    assert "meeting prep" in result.lower()
+    assert "DRI" in result
+    assert "issue" in result.lower()
+
+def test_mochary_difficult_conversation():
+    result = mochary("I need to have a difficult conversation with my co-founder")
+    assert "behavior" in result.lower()
+    assert "impact" in result.lower()
+
+def test_mochary_priorities():
+    result = mochary("I have too many priorities and I'm scattered")
+    assert "top goal" in result.lower()
+    assert "energy" in result.lower()
+
+def test_mochary_default():
+    result = mochary("help me with something")
+    assert "available frameworks" in result.lower()
+
+
+# --- duke ---
+
+def test_duke_message_review():
+    result = duke("review this message before I send it to Teresa")
+    assert "proposals not declarations" in result.lower()
+    assert "recipient" in result.lower()
+
+def test_duke_decision():
+    result = duke("should we commit to the 90-day pilot")
+    assert "pre-mortem" in result.lower()
+    assert "reversible" in result.lower()
+
+def test_duke_calibration():
+    result = duke("I think this partnership is going to work")
+    assert "percentage" in result.lower() or "%" in result
+    assert "evidence" in result.lower()
+
+def test_duke_default():
+    result = duke("what can you help with")
+    assert "decision quality" in result.lower()
+
+
+# --- komoroske ---
+
+def test_komoroske_sequencing():
+    result = komoroske("I have 8 ideas and don't know which to do first")
+    assert "shiny object" in result.lower()
+    assert "top 3" in result.lower()
+
+def test_komoroske_convergence():
+    result = komoroske("am I converging or diverging on LearnAIR")
+    assert "converging" in result.lower()
+    assert "leaf node" in result.lower()
+
+def test_komoroske_synthesis():
+    result = komoroske("evening synthesis, what did I learn today")
+    assert "stood out" in result.lower()
+    assert "compounds" in result.lower()
+
+def test_komoroske_build():
+    result = komoroske("should I build this feature")
+    assert "toehold" in result.lower()
+
+def test_komoroske_default():
+    result = komoroske("help")
+    assert "systems thinking" in result.lower()
