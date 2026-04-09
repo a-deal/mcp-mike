@@ -120,18 +120,37 @@ def hub(query: str) -> str:
 
 # --- Tool: quiz_me ---
 
-def quiz_me() -> str:
+def quiz_me(track: str = "") -> str:
     """Pick the next concept due for review and ask the quiz question.
 
     Uses spaced repetition: concepts due for review come first,
     then new concepts in tier order.
+
+    Args:
+        track: Optional filter. 'claude' for Claude usage, 'learnair' for
+               domain knowledge, 'internet' for technical foundations.
+               Empty string returns concepts from all tracks.
     """
     progress = _get_progress()
     now = datetime.now()
 
+    # Filter concepts by track
+    track_lower = track.lower().strip()
+    if track_lower == "claude":
+        pool = [c for c in CONCEPTS if "track" not in c]
+    elif track_lower:
+        pool = [c for c in CONCEPTS if c.get("track") == track_lower]
+    else:
+        pool = CONCEPTS
+
+    if not pool:
+        return f"No concepts found for track '{track}'. Available tracks: claude, learnair, internet (or leave empty for all)."
+
+    track_label = f" [{track_lower}]" if track_lower else ""
+
     # Find concepts due for review (past their next_review date)
     due = []
-    for concept in CONCEPTS:
+    for concept in pool:
         cid = concept["id"]
         if cid in progress:
             next_review = datetime.fromisoformat(progress[cid]["next_review"])
@@ -144,27 +163,36 @@ def quiz_me() -> str:
     if due:
         concept = due[0][1]
         times_reviewed = progress[concept["id"]]["times_correct"]
+        confused = ""
+        if "confused" in concept:
+            confused = f"\n\n_If this is fuzzy, say 'I'm confused' and I'll explain it differently._"
         return (
-            f"**Review: {concept['name']}** (Tier {concept['tier']}, reviewed {times_reviewed}x)\n\n"
+            f"**Review{track_label}: {concept['name']}** (Tier {concept['tier']}, reviewed {times_reviewed}x)\n\n"
             f"{concept['quiz']}\n\n"
             f"_When you're ready, use `mark_concept('{concept['id']}', 'correct')` or "
             f"`mark_concept('{concept['id']}', 'wrong')` to record your answer._"
+            f"{confused}"
         )
 
     # No reviews due, introduce a new concept
     learned_ids = set(progress.keys())
-    for concept in CONCEPTS:
+    for concept in pool:
         if concept["id"] not in learned_ids:
+            confused = ""
+            if "confused" in concept:
+                confused = f"\n\n**Still confused?** {concept['confused']}"
             return (
-                f"**New concept: {concept['name']}** (Tier {concept['tier']})\n\n"
+                f"**New concept{track_label}: {concept['name']}** (Tier {concept['tier']})\n\n"
                 f"{concept['summary']}\n\n"
                 f"**Practice:** {concept['practice']}\n\n"
                 f"**Quiz:** {concept['quiz']}\n\n"
                 f"_When you're ready, use `mark_concept('{concept['id']}', 'correct')` or "
                 f"`mark_concept('{concept['id']}', 'wrong')` to record your answer._"
+                f"{confused}"
             )
 
-    return "You've reviewed all 30 concepts. Keep practicing the ones that come up for review."
+    total = len(pool)
+    return f"You've reviewed all {total} concepts{track_label}. Keep practicing the ones that come up for review."
 
 
 # --- Tool: mark_concept ---
@@ -217,12 +245,55 @@ def mark_concept(concept_id: str, result: str) -> str:
         entry["interval_days"] = 1
         entry["next_review"] = (now + timedelta(days=1)).isoformat()
         _save_progress(progress)
+        confused = ""
+        if "confused" in concept:
+            confused = f"\n\n**Think of it this way:** {concept['confused']}"
         return (
             f"No worries. Let's review '{concept['name']}'.\n\n"
             f"**Summary:** {concept['summary']}\n\n"
-            f"**Practice:** {concept['practice']}\n\n"
+            f"**Practice:** {concept['practice']}"
+            f"{confused}\n\n"
             f"Next review tomorrow."
         )
+
+
+# --- Tool: progress ---
+
+def progress(track: str = "") -> str:
+    """Show learning progress across all tracks or a specific track.
+
+    Args:
+        track: Optional filter. 'claude', 'learnair', 'internet', or empty for all.
+    """
+    prog = _get_progress()
+    track_lower = track.lower().strip()
+
+    # Group concepts by track
+    tracks: dict[str, list[dict]] = {"claude": [], "learnair": [], "internet": [], "capstone": []}
+    for c in CONCEPTS:
+        t = c.get("track", "claude")
+        if t not in tracks:
+            tracks[t] = []
+        tracks[t].append(c)
+
+    if track_lower and track_lower not in tracks:
+        return f"Unknown track '{track}'. Available: claude, learnair, internet."
+
+    target_tracks = {track_lower: tracks[track_lower]} if track_lower else tracks
+    lines = []
+
+    for tname, concepts in target_tracks.items():
+        total = len(concepts)
+        started = sum(1 for c in concepts if c["id"] in prog)
+        mastered = sum(
+            1 for c in concepts
+            if c["id"] in prog and prog[c["id"]].get("interval_days", 1) >= 8
+        )
+        lines.append(
+            f"**{tname.upper()}** — {started}/{total} started, {mastered}/{total} mastered (8+ day interval)"
+        )
+
+    return "**Learning Progress**\n\n" + "\n".join(lines)
 
 
 # --- Tool: whats_next ---

@@ -18,6 +18,7 @@ from mcp_mike.tools import (
     hub,
     quiz_me,
     mark_concept,
+    progress,
     whats_next,
     save_note,
     _get_progress,
@@ -203,3 +204,84 @@ def test_save_note_timestamps(workspace):
     content = (workspace / "learnair" / "notes.md").read_text()
     # Should have a date/time marker
     assert "2026" in content or "- " in content
+
+
+# --- quiz_me with tracks ---
+
+def test_quiz_me_claude_track():
+    result = quiz_me("claude")
+    # Should only return Claude-usage concepts (no track field)
+    tier_1_names = [c["name"] for c in CONCEPTS if "track" not in c and c["tier"] == 1]
+    found = any(name.lower() in result.lower() for name in tier_1_names)
+    assert found, f"Expected a Claude concept in: {result[:100]}"
+
+
+def test_quiz_me_learnair_track():
+    result = quiz_me("learnair")
+    # Should return a LearnAIR domain concept
+    learnair_names = [c["name"] for c in CONCEPTS if c.get("track") == "learnair"]
+    found = any(name.lower() in result.lower() for name in learnair_names)
+    assert found, f"Expected a LearnAIR concept in: {result[:200]}"
+
+
+def test_quiz_me_internet_track():
+    result = quiz_me("internet")
+    internet_names = [c["name"] for c in CONCEPTS if c.get("track") == "internet"]
+    found = any(name.lower() in result.lower() for name in internet_names)
+    assert found, f"Expected an internet concept in: {result[:200]}"
+
+
+def test_quiz_me_invalid_track():
+    result = quiz_me("nonexistent")
+    assert "no concepts found" in result.lower()
+
+
+def test_quiz_me_all_tracks():
+    result = quiz_me("")
+    # Should return something (any track)
+    assert "?" in result or "quiz" in result.lower()
+
+
+def test_quiz_me_learnair_has_confused():
+    """LearnAIR concepts should surface 'confused' explanations."""
+    result = quiz_me("learnair")
+    assert "confused" in result.lower() or "fuzzy" in result.lower() or "think of it" in result.lower()
+
+
+def test_mark_concept_learnair_wrong_shows_confused(workspace):
+    """Marking a LearnAIR concept wrong should show the 'confused' explanation."""
+    result = mark_concept("supervision-gap", "wrong")
+    assert "think of it this way" in result.lower()
+
+
+def test_mark_concept_learnair_correct(workspace):
+    result = mark_concept("supervision-gap", "correct")
+    assert "correct" in result.lower() or "got it" in result.lower()
+    progress_data = _get_progress(workspace)
+    assert "supervision-gap" in progress_data
+
+
+# --- progress ---
+
+def test_progress_all_tracks(workspace):
+    result = progress()
+    assert "claude" in result.lower()
+    assert "learnair" in result.lower()
+    assert "internet" in result.lower()
+
+
+def test_progress_single_track(workspace):
+    result = progress("learnair")
+    assert "learnair" in result.lower()
+    assert "claude" not in result.lower()
+
+
+def test_progress_invalid_track(workspace):
+    result = progress("fake")
+    assert "unknown" in result.lower()
+
+
+def test_progress_after_learning(workspace):
+    mark_concept("supervision-gap", "correct")
+    result = progress("learnair")
+    assert "1/" in result  # 1 started
