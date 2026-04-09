@@ -24,6 +24,7 @@ from mcp_mike.tools import (
     quiz_me,
     mark_concept,
     progress,
+    checkpoint,
     mochary,
     duke,
     komoroske,
@@ -45,6 +46,8 @@ mcp = FastMCP(
         "Use mark_concept after answering a quiz to track progress. "
         "Use progress to show learning stats across tracks. "
         "When Mike marks a concept wrong, share the 'confused' explanation to help it click. "
+        "Use checkpoint to share learning progress with Andrew via the shared context repo. "
+        "Suggest running checkpoint at the end of each learning session. "
         "Use mochary for meeting prep, difficult conversations, priorities, and accountability. "
         "Use duke for decision quality checks, message review before sending, and calibrating confidence. "
         "Use komoroske for sequencing priorities, convergence checks, and evening synthesis. "
@@ -60,6 +63,7 @@ mcp.tool()(ingest)
 mcp.tool()(quiz_me)
 mcp.tool()(mark_concept)
 mcp.tool()(progress)
+mcp.tool()(checkpoint)
 mcp.tool()(mochary)
 mcp.tool()(duke)
 mcp.tool()(komoroske)

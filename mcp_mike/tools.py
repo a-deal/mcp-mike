@@ -867,6 +867,111 @@ def ingest(source: str, project: str = "") -> str:
         return f"Error reading {source}: {e}"
 
 
+# --- Tool: checkpoint ---
+
+def checkpoint() -> str:
+    """Share your learning progress with Andrew via the shared context repo.
+
+    Exports your quiz progress, recent notes, and a summary to
+    learnair-context/checkpoints/ so Andrew can see where you are
+    and adjust the curriculum.
+    """
+    context_dir = _context_repo()
+    if not context_dir.exists():
+        return "Shared context repo not found at ~/src/learnair-context. Clone it first."
+
+    checkpoint_dir = context_dir / "checkpoints"
+    checkpoint_dir.mkdir(exist_ok=True)
+
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+    time_str = now.strftime("%H:%M")
+
+    # --- Gather progress ---
+    prog = _get_progress()
+    tracks: dict[str, list[dict]] = {"claude": [], "learnair": [], "internet": [], "capstone": []}
+    for c in CONCEPTS:
+        t = c.get("track", "claude")
+        if t not in tracks:
+            tracks[t] = []
+        tracks[t].append(c)
+
+    lines = [f"# Checkpoint: {date_str} {time_str}\n"]
+
+    for tname, concepts in tracks.items():
+        total = len(concepts)
+        started = sum(1 for c in concepts if c["id"] in prog)
+        mastered = sum(
+            1 for c in concepts
+            if c["id"] in prog and prog[c["id"]].get("interval_days", 1) >= 8
+        )
+        lines.append(f"## {tname.upper()} — {started}/{total} started, {mastered}/{total} mastered")
+
+        # Show per-concept status
+        for c in concepts:
+            cid = c["id"]
+            if cid in prog:
+                p = prog[cid]
+                correct = p.get("times_correct", 0)
+                wrong = p.get("times_wrong", 0)
+                interval = p.get("interval_days", 1)
+                status = "mastered" if interval >= 8 else "learning"
+                lines.append(f"- [{status}] **{c['name']}** ({correct} correct, {wrong} wrong, {interval}d interval)")
+            else:
+                lines.append(f"- [ ] {c['name']}")
+        lines.append("")
+
+    # --- Gather recent notes ---
+    notes_file = _workspace() / "learning" / "notes.md"
+    if notes_file.exists():
+        notes_text = notes_file.read_text()
+        # Get last 10 lines of notes
+        recent = notes_text.strip().splitlines()[-10:]
+        if recent:
+            lines.append("## Recent Learning Notes")
+            lines.extend(recent)
+            lines.append("")
+
+    # --- Stuck concepts (wrong > correct) ---
+    stuck = []
+    for c in CONCEPTS:
+        cid = c["id"]
+        if cid in prog:
+            p = prog[cid]
+            if p.get("times_wrong", 0) > p.get("times_correct", 0):
+                stuck.append(c["name"])
+    if stuck:
+        lines.append("## Stuck On")
+        for s in stuck:
+            lines.append(f"- {s}")
+        lines.append("")
+
+    # Write checkpoint
+    checkpoint_file = checkpoint_dir / f"{date_str}.md"
+    checkpoint_file.write_text("\n".join(lines))
+
+    # Auto-commit and push if possible
+    try:
+        subprocess.run(
+            ["git", "add", "checkpoints/"],
+            cwd=str(context_dir), capture_output=True, timeout=5
+        )
+        subprocess.run(
+            ["git", "commit", "-m", f"checkpoint: {date_str} {time_str}"],
+            cwd=str(context_dir), capture_output=True, timeout=5
+        )
+        push_result = subprocess.run(
+            ["git", "push"],
+            cwd=str(context_dir), capture_output=True, text=True, timeout=10
+        )
+        if push_result.returncode == 0:
+            return f"Checkpoint saved and shared. Andrew can see your progress by pulling learnair-context."
+        else:
+            return f"Checkpoint saved to learnair-context/checkpoints/{date_str}.md but couldn't push. Run 'cd ~/src/learnair-context && git push' when you have internet."
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return f"Checkpoint saved to learnair-context/checkpoints/{date_str}.md. Push it when ready: cd ~/src/learnair-context && git push"
+
+
 # --- Tool: whats_next ---
 
 def whats_next() -> str:

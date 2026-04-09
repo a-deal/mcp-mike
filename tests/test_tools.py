@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from mcp_mike.tools import (
     quiz_me,
     mark_concept,
     progress,
+    checkpoint,
     mochary,
     duke,
     komoroske,
@@ -28,6 +30,7 @@ from mcp_mike.tools import (
     save_note,
     _get_progress,
     _save_progress,
+    _context_repo,
     CONCEPTS,
 )
 
@@ -430,3 +433,51 @@ def test_ingest_default_project(workspace, tmp_path):
 def test_ingest_file_not_found(workspace):
     result = ingest("/nonexistent/file.md", "learnair")
     assert "not found" in result.lower()
+
+
+# --- checkpoint ---
+
+def test_checkpoint_creates_file(workspace, tmp_path, monkeypatch):
+    """Checkpoint should create a dated file in the context repo."""
+    context = tmp_path / "learnair-context"
+    context.mkdir()
+
+    # Init a git repo so git commands don't fail
+    subprocess.run(["git", "init"], cwd=str(context), capture_output=True)
+    subprocess.run(["git", "checkout", "-b", "main"], cwd=str(context), capture_output=True)
+
+    monkeypatch.setattr("mcp_mike.tools._context_repo", lambda: context)
+
+    # Add some progress first
+    mark_concept("supervision-gap", "correct")
+    mark_concept("what-claude-is", "wrong")
+
+    result = checkpoint()
+    assert "checkpoint saved" in result.lower()
+
+    # Check file was created
+    checkpoints = list((context / "checkpoints").glob("*.md"))
+    assert len(checkpoints) == 1
+
+    content = checkpoints[0].read_text()
+    assert "LEARNAIR" in content
+    assert "supervision-gap" in content.lower() or "Supervision Gap" in content
+
+
+def test_checkpoint_shows_stuck(workspace, tmp_path, monkeypatch):
+    context = tmp_path / "learnair-context"
+    context.mkdir()
+    subprocess.run(["git", "init"], cwd=str(context), capture_output=True)
+    subprocess.run(["git", "checkout", "-b", "main"], cwd=str(context), capture_output=True)
+
+    monkeypatch.setattr("mcp_mike.tools._context_repo", lambda: context)
+
+    # Mark wrong twice, correct once -> stuck
+    mark_concept("what-claude-is", "wrong")
+    mark_concept("what-claude-is", "wrong")
+    mark_concept("what-claude-is", "correct")
+
+    checkpoint()
+
+    content = list((context / "checkpoints").glob("*.md"))[0].read_text()
+    assert "stuck" in content.lower()
