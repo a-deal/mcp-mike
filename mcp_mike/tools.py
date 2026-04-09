@@ -589,24 +589,84 @@ def komoroske(question: str) -> str:
 # --- Tool: discover ---
 
 def _search_dirs() -> list[Path]:
-    """Directories to scan for discover. Can be extended via MIKE_SEARCH_DIRS env var."""
+    """Directories to scan for discover. Broad by default, covers the whole user space."""
     home = Path.home()
-    defaults = [
+    dirs = [
+        # Standard user directories
         home / "Desktop",
         home / "Documents",
         home / "Downloads",
+        # Google Drive (multiple possible mount points)
+        home / "Google Drive",
+        home / "Google Drive - My Drive",
+        home / "Library" / "CloudStorage" / "GoogleDrive",
+        # Common Google Drive Backup & Sync / Drive for Desktop paths
+        Path("/Volumes/GoogleDrive"),
+        Path("/Volumes/GoogleDrive/My Drive"),
+        # iCloud
+        home / "Library" / "Mobile Documents" / "com~apple~CloudDocs",
+        # Dropbox
+        home / "Dropbox",
+        # OneDrive
+        home / "OneDrive",
+        # Projects / source
+        home / "src",
+        home / "Projects",
+        home / "Work",
     ]
+    # Also scan any CloudStorage mounts (Google Drive for Desktop shows up here)
+    cloud_storage = home / "Library" / "CloudStorage"
+    if cloud_storage.exists():
+        for child in cloud_storage.iterdir():
+            if child.is_dir() and child not in dirs:
+                dirs.append(child)
+
+    # Custom paths via env var
     extra = os.environ.get("MIKE_SEARCH_DIRS", "")
     if extra:
-        defaults.extend(Path(p.strip()) for p in extra.split(":") if p.strip())
-    return [d for d in defaults if d.exists()]
+        dirs.extend(Path(p.strip()) for p in extra.split(":") if p.strip())
+
+    return [d for d in dirs if d.exists()]
+
+
+# Directories and extensions to skip during file scanning
+_SKIP_DIRS = {
+    ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache",
+    ".Trash", "Library", "Applications", ".cache", ".npm", ".nvm",
+    "venv", "env", ".tox", "build", "dist", ".eggs",
+}
+_SKIP_EXTENSIONS = {
+    ".app", ".dmg", ".pkg", ".zip", ".gz", ".tar", ".bz2", ".xz",
+    ".iso", ".img", ".o", ".pyc", ".pyo", ".so", ".dylib", ".exe",
+    ".class", ".jar", ".war", ".whl", ".egg",
+    ".mp3", ".mp4", ".mov", ".avi", ".mkv", ".wav", ".flac",
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".ico", ".svg", ".webp",
+    ".ttf", ".otf", ".woff", ".woff2", ".eot",
+    ".sqlite", ".db", ".sqlite3",
+}
+_TEXT_EXTENSIONS = {
+    ".md", ".txt", ".csv", ".json", ".html", ".htm", ".rtf",
+    ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf",
+    ".xml", ".log", ".tex", ".rst", ".org",
+    ".py", ".js", ".ts", ".sh", ".bash", ".zsh",
+    ".doc", ".docx",  # filename match only, can't read content
+    ".pdf",           # filename match only
+    ".pptx", ".ppt",  # filename match only
+    ".xlsx", ".xls",  # filename match only
+}
+_CONTENT_READABLE = {
+    ".md", ".txt", ".csv", ".json", ".html", ".htm", ".rtf",
+    ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf",
+    ".xml", ".log", ".tex", ".rst", ".org",
+    ".py", ".js", ".ts", ".sh", ".bash", ".zsh",
+}
 
 
 def discover(query: str, source: str = "") -> str:
-    """Find files and Apple Notes matching a keyword across your machine.
+    """Find files and Apple Notes matching a keyword across your entire machine.
 
-    Scans Desktop, Documents, Downloads, and Apple Notes for matching content.
-    Use this when you know you have something somewhere but can't find it.
+    Scans Desktop, Documents, Downloads, Google Drive, iCloud, Dropbox,
+    OneDrive, src/, and Apple Notes. Finds by filename and text content.
 
     Args:
         query: What to search for (e.g. 'Teresa', 'workshop handout', 'LearnAIR').
@@ -616,49 +676,70 @@ def discover(query: str, source: str = "") -> str:
     query_lower = query.lower()
     source_lower = source.lower().strip()
     results = []
+    dirs_searched = []
 
     # --- Search local files ---
     if source_lower in ("", "files"):
         seen_paths: set[str] = set()
-        for search_dir in _search_dirs():
+        search_dirs = _search_dirs()
+        dirs_searched = [str(d) for d in search_dirs]
+
+        for search_dir in search_dirs:
             try:
                 for fpath in search_dir.rglob("*"):
                     if not fpath.is_file():
                         continue
                     if str(fpath) in seen_paths:
                         continue
-                    # Skip hidden files and common noise
-                    if any(part.startswith(".") for part in fpath.parts):
+                    # Skip hidden files and noisy directories
+                    parts = fpath.relative_to(search_dir).parts
+                    if any(part.startswith(".") or part in _SKIP_DIRS for part in parts):
                         continue
-                    if fpath.suffix.lower() in (".app", ".dmg", ".pkg", ".zip", ".gz", ".tar"):
+                    if fpath.suffix.lower() in _SKIP_EXTENSIONS:
                         continue
 
                     # Check filename match
                     name_match = query_lower in fpath.name.lower()
+                    # Also check parent folder names for context
+                    path_match = not name_match and query_lower in str(fpath).lower()
 
-                    # Check content match for text files
+                    # Check content match for readable text files
                     content_match = False
-                    if fpath.suffix.lower() in (".md", ".txt", ".csv", ".json", ".html", ".rtf"):
+                    if fpath.suffix.lower() in _CONTENT_READABLE:
                         try:
-                            text = fpath.read_text(errors="ignore")[:5000]
+                            text = fpath.read_text(errors="ignore")[:8000]
                             if query_lower in text.lower():
                                 content_match = True
                         except (OSError, UnicodeDecodeError):
                             pass
 
-                    if name_match or content_match:
+                    if name_match or path_match or content_match:
                         seen_paths.add(str(fpath))
-                        size = fpath.stat().st_size
-                        size_str = f"{size // 1024}KB" if size >= 1024 else f"{size}B"
-                        modified = datetime.fromtimestamp(fpath.stat().st_mtime).strftime("%Y-%m-%d")
-                        match_type = "name+content" if (name_match and content_match) else ("name" if name_match else "content")
+                        try:
+                            stat = fpath.stat()
+                            size = stat.st_size
+                            size_str = f"{size // 1024}KB" if size >= 1024 else f"{size}B"
+                            modified = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d")
+                        except OSError:
+                            size_str = "?"
+                            modified = "?"
+
+                        if name_match and content_match:
+                            match_type = "name+content"
+                        elif name_match:
+                            match_type = "name"
+                        elif content_match:
+                            match_type = "content"
+                        else:
+                            match_type = "path"
+
                         results.append(f"**{fpath}** ({size_str}, {modified}, {match_type})")
 
-                        if len(results) >= 20:
+                        if len(results) >= 30:
                             break
-            except PermissionError:
+            except (PermissionError, OSError):
                 continue
-            if len(results) >= 20:
+            if len(results) >= 30:
                 break
 
     # --- Search Apple Notes ---
@@ -682,7 +763,7 @@ def discover(query: str, source: str = "") -> str:
             '''
             result = subprocess.run(
                 ["osascript", "-e", script],
-                capture_output=True, text=True, timeout=10
+                capture_output=True, text=True, timeout=15
             )
             if result.returncode == 0 and result.stdout.strip():
                 for line in result.stdout.strip().splitlines():
@@ -692,7 +773,10 @@ def discover(query: str, source: str = "") -> str:
             pass
 
     if not results:
-        return f"Nothing found for '{query}'. Searched: {', '.join(str(d) for d in _search_dirs())} + Apple Notes."
+        searched = ", ".join(dirs_searched[:5])
+        if len(dirs_searched) > 5:
+            searched += f" (+{len(dirs_searched) - 5} more)"
+        return f"Nothing found for '{query}'. Searched: {searched} + Apple Notes."
 
     header = f"Found {len(results)} result(s) for '{query}':\n\n"
     return header + "\n".join(results) + "\n\n_To pull something into your workspace, use: ingest('[path or note title]', '[project]')_"

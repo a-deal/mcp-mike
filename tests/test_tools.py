@@ -365,37 +365,34 @@ def test_komoroske_default():
 
 # --- discover ---
 
-def test_discover_finds_files_by_name(workspace, tmp_path):
+def test_discover_finds_files_by_name(workspace, tmp_path, monkeypatch):
     """Discover should find files matching query in search dirs."""
-    # Create a test file in a searchable location
     search_dir = tmp_path / "searchable"
     search_dir.mkdir()
     (search_dir / "teresa-notes.md").write_text("Notes from call with Teresa about curriculum.")
 
-    os.environ["MIKE_SEARCH_DIRS"] = str(search_dir)
+    # Override search dirs to only scan our test directory
+    monkeypatch.setattr("mcp_mike.tools._search_dirs", lambda: [search_dir])
     result = discover("teresa", "files")
-    del os.environ["MIKE_SEARCH_DIRS"]
     assert "teresa" in result.lower()
 
 
-def test_discover_finds_files_by_content(workspace, tmp_path):
+def test_discover_finds_files_by_content(workspace, tmp_path, monkeypatch):
     search_dir = tmp_path / "searchable"
     search_dir.mkdir()
     (search_dir / "meeting-notes.md").write_text("Discussed employer readiness with Justin and Teresa.")
 
-    os.environ["MIKE_SEARCH_DIRS"] = str(search_dir)
+    monkeypatch.setattr("mcp_mike.tools._search_dirs", lambda: [search_dir])
     result = discover("employer readiness", "files")
-    del os.environ["MIKE_SEARCH_DIRS"]
     assert "meeting-notes" in result.lower()
 
 
-def test_discover_no_results(workspace, tmp_path):
+def test_discover_no_results(workspace, tmp_path, monkeypatch):
     search_dir = tmp_path / "empty"
     search_dir.mkdir()
 
-    os.environ["MIKE_SEARCH_DIRS"] = str(search_dir)
+    monkeypatch.setattr("mcp_mike.tools._search_dirs", lambda: [search_dir])
     result = discover("xyznonexistent", "files")
-    del os.environ["MIKE_SEARCH_DIRS"]
     assert "nothing found" in result.lower()
 
 
