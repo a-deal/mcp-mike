@@ -16,6 +16,8 @@ os.environ["MIKE_WORKSPACE"] = _tmp
 from mcp_mike.tools import (
     load_persona,
     hub,
+    discover,
+    ingest,
     quiz_me,
     mark_concept,
     progress,
@@ -359,3 +361,75 @@ def test_komoroske_build():
 def test_komoroske_default():
     result = komoroske("help")
     assert "systems thinking" in result.lower()
+
+
+# --- discover ---
+
+def test_discover_finds_files_by_name(workspace, tmp_path):
+    """Discover should find files matching query in search dirs."""
+    # Create a test file in a searchable location
+    search_dir = tmp_path / "searchable"
+    search_dir.mkdir()
+    (search_dir / "teresa-notes.md").write_text("Notes from call with Teresa about curriculum.")
+
+    os.environ["MIKE_SEARCH_DIRS"] = str(search_dir)
+    result = discover("teresa", "files")
+    del os.environ["MIKE_SEARCH_DIRS"]
+    assert "teresa" in result.lower()
+
+
+def test_discover_finds_files_by_content(workspace, tmp_path):
+    search_dir = tmp_path / "searchable"
+    search_dir.mkdir()
+    (search_dir / "meeting-notes.md").write_text("Discussed employer readiness with Justin and Teresa.")
+
+    os.environ["MIKE_SEARCH_DIRS"] = str(search_dir)
+    result = discover("employer readiness", "files")
+    del os.environ["MIKE_SEARCH_DIRS"]
+    assert "meeting-notes" in result.lower()
+
+
+def test_discover_no_results(workspace, tmp_path):
+    search_dir = tmp_path / "empty"
+    search_dir.mkdir()
+
+    os.environ["MIKE_SEARCH_DIRS"] = str(search_dir)
+    result = discover("xyznonexistent", "files")
+    del os.environ["MIKE_SEARCH_DIRS"]
+    assert "nothing found" in result.lower()
+
+
+# --- ingest ---
+
+def test_ingest_local_file(workspace, tmp_path):
+    source = tmp_path / "workshop-handout.md"
+    source.write_text("# Workshop Handout\nContent for the Wednesday session.")
+
+    result = ingest(str(source), "workshops")
+    assert "ingested" in result.lower()
+    assert (workspace / "workshops" / "workshop-handout.md").exists()
+    content = (workspace / "workshops" / "workshop-handout.md").read_text()
+    assert "Workshop Handout" in content
+    assert "source:" in content  # frontmatter
+
+
+def test_ingest_creates_project_dir(workspace, tmp_path):
+    source = tmp_path / "new-thing.txt"
+    source.write_text("Some content.")
+
+    result = ingest(str(source), "new-project")
+    assert "ingested" in result.lower()
+    assert (workspace / "new-project").exists()
+
+
+def test_ingest_default_project(workspace, tmp_path):
+    source = tmp_path / "random-file.md"
+    source.write_text("Stuff.")
+
+    result = ingest(str(source))
+    assert "reference" in result.lower()
+
+
+def test_ingest_file_not_found(workspace):
+    result = ingest("/nonexistent/file.md", "learnair")
+    assert "not found" in result.lower()

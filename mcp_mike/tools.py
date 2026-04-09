@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -583,6 +584,203 @@ def komoroske(question: str) -> str:
         "Some things get tighter on their own. Others spread until there's nothing left. "
         "Know which one you're in._"
     )
+
+
+# --- Tool: discover ---
+
+def _search_dirs() -> list[Path]:
+    """Directories to scan for discover. Can be extended via MIKE_SEARCH_DIRS env var."""
+    home = Path.home()
+    defaults = [
+        home / "Desktop",
+        home / "Documents",
+        home / "Downloads",
+    ]
+    extra = os.environ.get("MIKE_SEARCH_DIRS", "")
+    if extra:
+        defaults.extend(Path(p.strip()) for p in extra.split(":") if p.strip())
+    return [d for d in defaults if d.exists()]
+
+
+def discover(query: str, source: str = "") -> str:
+    """Find files and Apple Notes matching a keyword across your machine.
+
+    Scans Desktop, Documents, Downloads, and Apple Notes for matching content.
+    Use this when you know you have something somewhere but can't find it.
+
+    Args:
+        query: What to search for (e.g. 'Teresa', 'workshop handout', 'LearnAIR').
+        source: Optional. 'files' for local files only, 'notes' for Apple Notes only.
+                Empty searches both.
+    """
+    query_lower = query.lower()
+    source_lower = source.lower().strip()
+    results = []
+
+    # --- Search local files ---
+    if source_lower in ("", "files"):
+        seen_paths: set[str] = set()
+        for search_dir in _search_dirs():
+            try:
+                for fpath in search_dir.rglob("*"):
+                    if not fpath.is_file():
+                        continue
+                    if str(fpath) in seen_paths:
+                        continue
+                    # Skip hidden files and common noise
+                    if any(part.startswith(".") for part in fpath.parts):
+                        continue
+                    if fpath.suffix.lower() in (".app", ".dmg", ".pkg", ".zip", ".gz", ".tar"):
+                        continue
+
+                    # Check filename match
+                    name_match = query_lower in fpath.name.lower()
+
+                    # Check content match for text files
+                    content_match = False
+                    if fpath.suffix.lower() in (".md", ".txt", ".csv", ".json", ".html", ".rtf"):
+                        try:
+                            text = fpath.read_text(errors="ignore")[:5000]
+                            if query_lower in text.lower():
+                                content_match = True
+                        except (OSError, UnicodeDecodeError):
+                            pass
+
+                    if name_match or content_match:
+                        seen_paths.add(str(fpath))
+                        size = fpath.stat().st_size
+                        size_str = f"{size // 1024}KB" if size >= 1024 else f"{size}B"
+                        modified = datetime.fromtimestamp(fpath.stat().st_mtime).strftime("%Y-%m-%d")
+                        match_type = "name+content" if (name_match and content_match) else ("name" if name_match else "content")
+                        results.append(f"**{fpath}** ({size_str}, {modified}, {match_type})")
+
+                        if len(results) >= 20:
+                            break
+            except PermissionError:
+                continue
+            if len(results) >= 20:
+                break
+
+    # --- Search Apple Notes ---
+    if source_lower in ("", "notes"):
+        try:
+            script = f'''
+            tell application "Notes"
+                set matchingNotes to {{}}
+                repeat with aNote in every note
+                    if name of aNote contains "{query}" then
+                        set end of matchingNotes to (name of aNote) & " | " & (modification date of aNote as string)
+                    end if
+                    if (count of matchingNotes) >= 10 then exit repeat
+                end repeat
+                set output to ""
+                repeat with n in matchingNotes
+                    set output to output & n & linefeed
+                end repeat
+                return output
+            end tell
+            '''
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                for line in result.stdout.strip().splitlines():
+                    if line.strip():
+                        results.append(f"**[Apple Note]** {line.strip()}")
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+
+    if not results:
+        return f"Nothing found for '{query}'. Searched: {', '.join(str(d) for d in _search_dirs())} + Apple Notes."
+
+    header = f"Found {len(results)} result(s) for '{query}':\n\n"
+    return header + "\n".join(results) + "\n\n_To pull something into your workspace, use: ingest('[path or note title]', '[project]')_"
+
+
+# --- Tool: ingest ---
+
+def ingest(source: str, project: str = "") -> str:
+    """Pull a file or Apple Note into your workspace, organized by project.
+
+    Args:
+        source: File path or Apple Note title. For Apple Notes, prefix with 'note:' (e.g. 'note:Teresa Follow-up').
+        project: Project folder to save into (e.g. 'learnair', 'workshops', 'reference').
+                 If empty, saves to 'reference'.
+    """
+    project_name = project.lower().strip() or "reference"
+    project_dir = _workspace() / project_name
+    project_dir.mkdir(parents=True, exist_ok=True)
+
+    # --- Apple Note ---
+    if source.lower().startswith("note:"):
+        note_title = source[5:].strip()
+        try:
+            script = f'''
+            tell application "Notes"
+                set matchingNotes to every note whose name contains "{note_title}"
+                if (count of matchingNotes) > 0 then
+                    set theNote to item 1 of matchingNotes
+                    return (name of theNote) & "\\n---\\n" & (plaintext of theNote)
+                else
+                    return "NOT_FOUND"
+                end if
+            end tell
+            '''
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode != 0 or "NOT_FOUND" in result.stdout:
+                return f"Apple Note '{note_title}' not found. Try discover('{note_title}', 'notes') to search."
+
+            content = result.stdout.strip()
+            # Clean filename from note title
+            safe_name = "".join(c if c.isalnum() or c in " -_" else "" for c in note_title).strip()
+            safe_name = safe_name.replace(" ", "-").lower()[:60]
+            dest = project_dir / f"{safe_name}.md"
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+            header = f"---\nsource: Apple Note\ntitle: {note_title}\ningested: {timestamp}\n---\n\n"
+            dest.write_text(header + content)
+            return f"Ingested Apple Note '{note_title}' to {project_name}/{dest.name}"
+
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return "Could not access Apple Notes. Make sure Notes app is available."
+
+    # --- Local file ---
+    source_path = Path(os.path.expanduser(source))
+    if not source_path.exists():
+        return f"File not found: {source}. Use discover() to find files first."
+
+    if not source_path.is_file():
+        return f"{source} is a directory, not a file. Point to a specific file."
+
+    # Read and copy
+    try:
+        if source_path.suffix.lower() in (".md", ".txt", ".csv", ".json", ".html", ".rtf"):
+            content = source_path.read_text(errors="ignore")
+            dest = project_dir / source_path.name
+            if dest.suffix != ".md":
+                dest = dest.with_suffix(dest.suffix + ".md")
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+            header = f"---\nsource: {source_path}\ningested: {timestamp}\n---\n\n"
+            dest.write_text(header + content)
+            return f"Ingested {source_path.name} to {project_name}/{dest.name}"
+        elif source_path.suffix.lower() == ".pdf":
+            # Copy PDF as-is
+            dest = project_dir / source_path.name
+            import shutil
+            shutil.copy2(source_path, dest)
+            return f"Copied {source_path.name} to {project_name}/{dest.name} (PDF, not searchable by hub)"
+        else:
+            dest = project_dir / source_path.name
+            import shutil
+            shutil.copy2(source_path, dest)
+            return f"Copied {source_path.name} to {project_name}/{dest.name}"
+    except (OSError, PermissionError) as e:
+        return f"Error reading {source}: {e}"
 
 
 # --- Tool: whats_next ---

@@ -19,6 +19,8 @@ from mcp.server.fastmcp import FastMCP
 from mcp_mike.tools import (
     load_persona,
     hub,
+    discover,
+    ingest,
     quiz_me,
     mark_concept,
     progress,
@@ -35,6 +37,8 @@ mcp = FastMCP(
         "Mike's personal workspace tools. "
         "Use load_persona to load a persona (e.g. 'nexus') instead of Mike pasting it manually. "
         "Use hub to search LearnAIR and strategy docs by keyword. "
+        "Use discover to find files and Apple Notes on Mike's machine by keyword. "
+        "Use ingest to pull a file or Apple Note into the workspace, organized by project. "
         "Use quiz_me to do a spaced repetition quiz. Three tracks available: "
         "'claude' (how to use Claude), 'learnair' (domain knowledge for the veteran AI supervision curriculum), "
         "'internet' (technical foundations). Leave track empty for all. "
@@ -51,6 +55,8 @@ mcp = FastMCP(
 
 mcp.tool()(load_persona)
 mcp.tool()(hub)
+mcp.tool()(discover)
+mcp.tool()(ingest)
 mcp.tool()(quiz_me)
 mcp.tool()(mark_concept)
 mcp.tool()(progress)
