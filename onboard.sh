@@ -92,7 +92,26 @@ else
 fi
 
 # -----------------------------------------------
-step "Step 3: Install MCP server"
+step "Step 3: Clone shared context repo"
+# -----------------------------------------------
+
+CONTEXT_DIR="$HOME/src/learnair-context"
+if [ -d "$CONTEXT_DIR" ]; then
+    info "learnair-context already exists at $CONTEXT_DIR"
+    cd "$CONTEXT_DIR" && git pull -q 2>/dev/null
+    pass "Shared context up to date"
+else
+    cd "$HOME/src"
+    if git clone -q https://github.com/a-deal/learnair-context.git 2>/dev/null; then
+        pass "Cloned learnair-context (42 shared docs)"
+    else
+        info "Could not clone learnair-context. Check internet connection."
+        info "You can clone it later: cd ~/src && git clone https://github.com/a-deal/learnair-context.git"
+    fi
+fi
+
+# -----------------------------------------------
+step "Step 4: Install MCP server (pip)"
 # -----------------------------------------------
 
 cd "$SCRIPT_DIR"
@@ -109,7 +128,7 @@ pip install -q -e . 2>&1 | tail -1
 pass "MCP server installed"
 
 # -----------------------------------------------
-step "Step 4: Verify server loads"
+step "Step 5: Verify server loads"
 # -----------------------------------------------
 
 # Quick import test
@@ -128,7 +147,7 @@ else
 fi
 
 # -----------------------------------------------
-step "Step 5: Seed hub docs"
+step "Step 6: Seed hub docs"
 # -----------------------------------------------
 
 # Check if we're on Andrew's machine (has the hub)
@@ -150,7 +169,7 @@ HUB_COUNT=$(ls -1 "$WORKSPACE/hub/"*.md 2>/dev/null | wc -l | tr -d ' ')
 info "$HUB_COUNT docs in hub"
 
 # -----------------------------------------------
-step "Step 6: Generate Claude Desktop config"
+step "Step 7: Generate Claude Desktop config"
 # -----------------------------------------------
 
 PYTHON_PATH="$SCRIPT_DIR/.venv/bin/python3"
@@ -197,7 +216,7 @@ else
 fi
 
 # -----------------------------------------------
-step "Step 7: Run tests"
+step "Step 8: Run tests"
 # -----------------------------------------------
 
 cd "$SCRIPT_DIR"
@@ -224,7 +243,10 @@ echo "  2. Open a new conversation and try:"
 echo "     > \"quiz me on learnair\""
 echo "     > \"search the hub for employer signal\""
 echo "     > \"show my progress\""
+echo "     > \"find files about LearnAIR\""
+echo "     > \"mochary: prep for my next call\""
 echo "     > \"save a note to learning: first session complete\""
+echo "     > \"share my progress\""
 echo ""
 echo "  3. Open the workstation in your browser:"
 echo "     https://andrewdeal.info/learnair/workstation"
@@ -233,7 +255,14 @@ echo "  4. Daily routine: 1 hour."
 echo "     Read a concept in the workstation."
 echo "     Practice it in Claude Desktop."
 echo "     Quiz yourself. Record what clicked."
+echo "     Share your progress at the end."
+echo ""
+echo "  5. To update (when Andrew pushes changes):"
+echo "     cd ~/src/mcp-mike && git pull"
+echo "     cd ~/src/learnair-context && git pull"
+echo "     Restart Claude Desktop."
 echo ""
 echo "  Workspace: $WORKSPACE"
+echo "  Shared context: $HOME/src/learnair-context"
 echo "  MCP server: $SCRIPT_DIR"
 echo ""

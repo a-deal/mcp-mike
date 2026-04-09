@@ -395,7 +395,7 @@ def test_discover_no_results(workspace, tmp_path, monkeypatch):
     search_dir.mkdir()
 
     monkeypatch.setattr("mcp_mike.tools._search_dirs", lambda: [search_dir])
-    result = discover("xyznonexistent", "files")
+    result = discover("zzz_truly_nonexistent_term_42", "files")
     assert "nothing found" in result.lower()
 
 
