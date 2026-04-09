@@ -85,35 +85,52 @@ def load_persona(name: str) -> str:
 
 # --- Tool: hub ---
 
+def _context_repo() -> Path:
+    """Shared context repo. Override with LEARNAIR_CONTEXT env var."""
+    return Path(os.environ.get("LEARNAIR_CONTEXT", os.path.expanduser("~/src/learnair-context")))
+
+
 def hub(query: str) -> str:
-    """Search hub docs for a keyword. Returns matching passages.
+    """Search hub docs and shared context for a keyword. Returns matching passages.
+
+    Searches both the personal workspace hub and the shared learnair-context repo.
 
     Args:
         query: Search term (case-insensitive).
     """
+    search_dirs: list[tuple[str, Path]] = []
+
     hub_dir = _workspace() / "hub"
-    if not hub_dir.exists():
-        return f"Hub directory not found at {hub_dir}."
+    if hub_dir.exists():
+        search_dirs.append(("hub", hub_dir))
+
+    context_dir = _context_repo()
+    if context_dir.exists():
+        search_dirs.append(("context", context_dir))
+
+    if not search_dirs:
+        return "No hub or context directories found."
 
     query_lower = query.lower()
     results = []
 
-    for md_file in sorted(hub_dir.rglob("*.md")):
-        lines = md_file.read_text().splitlines()
-        for i, line in enumerate(lines):
-            if query_lower in line.lower():
-                # Grab surrounding context (2 lines before, 2 after)
-                start = max(0, i - 2)
-                end = min(len(lines), i + 3)
-                snippet = "\n".join(lines[start:end])
-                rel_path = md_file.relative_to(hub_dir)
-                results.append(f"**{rel_path}** (line {i + 1}):\n{snippet}")
+    for source_name, search_dir in search_dirs:
+        for md_file in sorted(search_dir.rglob("*.md")):
+            lines = md_file.read_text().splitlines()
+            for i, line in enumerate(lines):
+                if query_lower in line.lower():
+                    # Grab surrounding context (2 lines before, 2 after)
+                    start = max(0, i - 2)
+                    end = min(len(lines), i + 3)
+                    snippet = "\n".join(lines[start:end])
+                    rel_path = md_file.relative_to(search_dir)
+                    results.append(f"**[{source_name}] {rel_path}** (line {i + 1}):\n{snippet}")
 
     if not results:
-        return f"Nothing found for '{query}' in hub docs."
+        return f"Nothing found for '{query}' in hub or shared context."
 
-    # Cap at 5 results to keep output manageable
-    output = results[:5]
+    # Cap at 8 results to keep output manageable
+    output = results[:8]
     header = f"Found {len(results)} match(es) for '{query}':\n\n"
     return header + "\n\n---\n\n".join(output)
 
