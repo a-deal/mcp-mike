@@ -124,7 +124,7 @@ else
 fi
 
 source .venv/bin/activate
-pip install -q -e . 2>&1 | tail -1
+pip install -q -e ".[dev]" 2>&1 | tail -1
 pass "MCP server installed"
 
 # -----------------------------------------------
@@ -189,30 +189,62 @@ CONFIG=$(cat <<EOF
 EOF
 )
 
-# Check if config already exists
+# Auto-write or merge mike-workspace into Desktop config
 CLAUDE_CONFIG="$CLAUDE_CONFIG_DIR/claude_desktop_config.json"
-if [ -f "$CLAUDE_CONFIG" ]; then
-    if grep -q "mike-workspace" "$CLAUDE_CONFIG" 2>/dev/null; then
-        pass "Claude Desktop already configured with mike-workspace"
-    else
-        info "Claude Desktop config exists but doesn't include mike-workspace."
-        echo ""
-        echo "  Add this to your existing config (Settings > Developer > Edit Config):"
-        echo ""
-        echo "    \"mike-workspace\": {"
-        echo "      \"command\": \"$PYTHON_PATH\","
-        echo "      \"args\": [\"-m\", \"mcp_mike.server\"],"
-        echo "      \"env\": {"
-        echo "        \"MIKE_WORKSPACE\": \"$WORKSPACE\""
-        echo "      }"
-        echo "    }"
-        echo ""
-    fi
-else
-    info "No Claude Desktop config found. Creating one..."
+if [ ! -f "$CLAUDE_CONFIG" ]; then
     mkdir -p "$CLAUDE_CONFIG_DIR"
     echo "$CONFIG" > "$CLAUDE_CONFIG"
-    pass "Config written to $CLAUDE_CONFIG"
+    pass "Claude Desktop config created"
+else
+    "$PYTHON_PATH" - <<PYEOF
+import json
+
+with open("$CLAUDE_CONFIG") as f:
+    config = json.load(f)
+
+config.setdefault("mcpServers", {})
+config["mcpServers"]["mike-workspace"] = {
+    "command": "$PYTHON_PATH",
+    "args": ["-m", "mcp_mike.server"],
+    "env": {"MIKE_WORKSPACE": "$WORKSPACE"}
+}
+
+with open("$CLAUDE_CONFIG", "w") as f:
+    json.dump(config, f, indent=2)
+    f.write("\n")
+PYEOF
+    pass "Claude Desktop config updated"
+fi
+
+# -----------------------------------------------
+step "Step 7b: Sync Claude Code CLI config"
+# -----------------------------------------------
+
+CLI_CONFIG="$HOME/.claude/.mcp.json"
+mkdir -p "$(dirname "$CLI_CONFIG")"
+
+if [ ! -f "$CLI_CONFIG" ]; then
+    echo "$CONFIG" > "$CLI_CONFIG"
+    pass "CLI config created at $CLI_CONFIG"
+else
+    "$PYTHON_PATH" - <<PYEOF
+import json
+
+with open("$CLI_CONFIG") as f:
+    config = json.load(f)
+
+config.setdefault("mcpServers", {})
+config["mcpServers"]["mike-workspace"] = {
+    "command": "$PYTHON_PATH",
+    "args": ["-m", "mcp_mike.server"],
+    "env": {"MIKE_WORKSPACE": "$WORKSPACE"}
+}
+
+with open("$CLI_CONFIG", "w") as f:
+    json.dump(config, f, indent=2)
+    f.write("\n")
+PYEOF
+    pass "CLI config updated at $CLI_CONFIG"
 fi
 
 # -----------------------------------------------
@@ -258,9 +290,8 @@ echo "     Quiz yourself. Record what clicked."
 echo "     Share your progress at the end."
 echo ""
 echo "  5. To update (when Andrew pushes changes):"
-echo "     cd ~/src/mcp-mike && git pull"
-echo "     cd ~/src/learnair-context && git pull"
-echo "     Restart Claude Desktop."
+echo "     cd ~/src/mcp-mike && git pull && bash onboard.sh"
+echo "     Restart Claude Desktop and reopen Claude Code CLI."
 echo ""
 echo "  Workspace: $WORKSPACE"
 echo "  Shared context: $HOME/src/learnair-context"

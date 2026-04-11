@@ -11,6 +11,9 @@ dependencies = [
     "mcp>=1.0.0",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [project.scripts]
 mcp-mike = "mcp_mike.server:main"
 
