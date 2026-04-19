@@ -9,6 +9,11 @@ Tools:
   mochary       - meeting prep, difficult conversations, accountability frameworks
   duke          - decision quality, message review, calibration
   komoroske     - systems thinking, sequencing, convergence checks
+  ng            - SKILL: execution-first curriculum and practice (Andrew Ng)
+  brynjolfsson  - MARKET: role targeting, market sizing, employer ROI (Erik Brynjolfsson)
+  nadella       - ENVIRONMENT: real workflows, culture, platforms (Satya Nadella)
+  mattis        - LEADERSHIP: commander's intent, decisions, team (Jim Mattis)
+  priestley     - POSITIONING: scarcity, 5 P's, ascending ladder (Daniel Priestley)
   whats_next    - find TODOs across all projects
   save_note     - append a timestamped note to a project
 """
@@ -28,6 +33,11 @@ from mcp_mike.tools import (
     mochary,
     duke,
     komoroske,
+    ng,
+    brynjolfsson,
+    nadella,
+    mattis,
+    priestley,
     whats_next,
     save_note,
 )
@@ -51,6 +61,11 @@ mcp = FastMCP(
         "Use mochary for meeting prep, difficult conversations, priorities, and accountability. "
         "Use duke for decision quality checks, message review before sending, and calibrating confidence. "
         "Use komoroske for sequencing priorities, convergence checks, and evening synthesis. "
+        "Use ng (Andrew Ng) for Mike's SKILL frame: execution-first, output-based curriculum and practice design. "
+        "Use brynjolfsson (Erik Brynjolfsson) for Mike's MARKET frame: role targeting, market sizing, employer ROI. "
+        "Use nadella (Satya Nadella) for Mike's ENVIRONMENT frame: training inside real workflows, culture change, platform thinking. "
+        "Use mattis (Jim Mattis) for Mike's LEADERSHIP frame: commander's intent, decisions under ambiguity, team cohesion. "
+        "Use priestley (Daniel Priestley) for Mike's POSITIONING frame: scarcity, oversubscribed cohorts, the 5 P's. "
         "Use whats_next to see TODOs across all projects. "
         "Use save_note to capture decisions, action items, or thoughts to a project."
     ),
@@ -67,6 +82,11 @@ mcp.tool()(checkpoint)
 mcp.tool()(mochary)
 mcp.tool()(duke)
 mcp.tool()(komoroske)
+mcp.tool()(ng)
+mcp.tool()(brynjolfsson)
+mcp.tool()(nadella)
+mcp.tool()(mattis)
+mcp.tool()(priestley)
 mcp.tool()(whats_next)
 mcp.tool()(save_note)
 

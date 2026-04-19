@@ -586,6 +586,503 @@ def komoroske(question: str) -> str:
     )
 
 
+# --- Tool: ng (Andrew Ng) ---
+
+def ng(situation: str) -> str:
+    """Apply Andrew Ng's frame: Skill — execution-first, output-based training.
+
+    Ng built Coursera, deeplearning.ai, and Google Brain. His teaching pattern:
+    build projects end-to-end, ship small, iterate on error analysis, data before
+    algorithm. Use this when designing curriculum, teaching practice, or
+    deciding what "skill" means for the veteran program.
+
+    Args:
+        situation: What you're working on. Examples: 'designing module 1 practice',
+                   'what should learners actually DO', 'am I teaching theory or skill'.
+    """
+    sit = situation.lower()
+
+    if any(w in sit for w in ["practice", "exercise", "assignment", "project", "ship", "hands-on"]):
+        return (
+            "**Ng: Build the project first, then name the theory.**\n\n"
+            "Ng's deeplearning.ai pattern: every week, a hands-on project. Theory\n"
+            "serves the project, not the other way around.\n\n"
+            "1. **What does the learner ship at the end of this module?** Name the\n"
+            "   artifact. 'A working X' beats 'understanding of Y' every time.\n"
+            "2. **Can they build it end-to-end in one sitting?** If no, it's too big.\n"
+            "   Cut scope until yes. Then layer complexity across modules.\n"
+            "3. **Is the data real?** Toy datasets teach toy skills. For veteran\n"
+            "   AI supervision: use actual agent transcripts, actual tool calls,\n"
+            "   actual errors. The workflow IS the curriculum.\n"
+            "4. **Error analysis > accuracy.** When the project fails, the learning\n"
+            "   is in the analysis: what broke, why, what to fix next. Build this\n"
+            "   into the exercise.\n"
+            "5. **Baby steps, shipped.** Ten small projects > one big project.\n"
+            "   Each one complete. Each one runs.\n\n"
+            "_\"The best way to learn ML is to build projects.\" Replace ML with\n"
+            "agent supervision. Same rule._"
+        )
+
+    if any(w in sit for w in ["curriculum", "module", "program", "design", "teach", "sequence"]):
+        return (
+            "**Ng: Output-based curriculum design.**\n\n"
+            "Start from the output, work backward to the skill:\n\n"
+            "1. **What can the graduate do on Day 1 of the job?** Be concrete.\n"
+            "   'Can supervise a 3-agent workflow, identify drift, intervene correctly.'\n"
+            "   If you can't write the job description, you can't design the module.\n"
+            "2. **Decompose into observable behaviors.** Not 'understands prompting.'\n"
+            "   'Writes a prompt that reduces false positives by 20% on the eval set.'\n"
+            "3. **Sequence by dependency, not topic.** What do they need BEFORE\n"
+            "   they can do X? Teach that, then X. Don't teach topics in textbook order.\n"
+            "4. **Assess on production-like tasks.** Not multiple choice. Give them\n"
+            "   a messy real problem and see if they solve it.\n"
+            "5. **Iterate the curriculum like you iterate a product.** Cohort 1\n"
+            "   teaches you what cohort 2 needs. Error analysis applies to teaching too.\n\n"
+            "_\"AI is the new electricity. But electricity didn't light houses\n"
+            "until someone built the lamp.\" Teach the lamp-building._"
+        )
+
+    if any(w in sit for w in ["data", "dataset", "example"]):
+        return (
+            "**Ng: Data > Algorithm.**\n\n"
+            "For Mike's curriculum: the data IS the curriculum.\n\n"
+            "1. **Collect real workflows.** Agent traces, tool calls, failed runs,\n"
+            "   corrected outputs. These are the textbook.\n"
+            "2. **Label the failure modes.** What went wrong? Why? What would a\n"
+            "   trained supervisor have caught? Label 100 examples, patterns emerge.\n"
+            "3. **Small data, done well, beats big data done poorly.** Ten annotated\n"
+            "   agent traces with commentary beats a thousand raw logs.\n"
+            "4. **Your learners become the labelers.** As they train, they produce\n"
+            "   new labeled examples. The cohort creates the next cohort's textbook.\n\n"
+            "_\"Better data beats better models.\" Better examples beat better lectures._"
+        )
+
+    return (
+        "**Ng: Execution-first learning.**\n\n"
+        "Mike's frame for Ng: Skill → execution-first, output-based training.\n\n"
+        "Tell me what you're working on. I can help with:\n\n"
+        "- **Practice design** — what should the learner actually build this week?\n"
+        "- **Curriculum structure** — output-first module sequencing\n"
+        "- **Data as curriculum** — using real workflows as the textbook\n\n"
+        "Say: 'ng: designing module 1 practice' or 'ng: what should the learner ship'.\n\n"
+        "_Andrew Ng built Coursera, deeplearning.ai, Google Brain. His core insight:\n"
+        "theory follows practice, not the reverse. Build first, understand second._"
+    )
+
+
+# --- Tool: brynjolfsson (Erik Brynjolfsson) ---
+
+def brynjolfsson(situation: str) -> str:
+    """Apply Brynjolfsson's frame: Market — target roles with economic upside.
+
+    Stanford Digital Economy Lab. The Second Machine Age, The Turing Trap. His
+    research shows where AI creates jobs (complementary skills) vs destroys them
+    (substitutable routine). Use this when sizing the opportunity, targeting
+    roles, or justifying why THIS cohort and not another.
+
+    Args:
+        situation: What you're evaluating. Examples: 'which roles should we target',
+                   'is this market big enough', 'how do I talk to employers about ROI'.
+    """
+    sit = situation.lower()
+
+    if any(w in sit for w in ["role", "target", "job", "who"]):
+        return (
+            "**Brynjolfsson: Target the complement, not the substitute.**\n\n"
+            "AI hits jobs asymmetrically. His 2023 call-center study found AI boosted\n"
+            "the BOTTOM 20% of workers the most — entry-level gained ground, experts\n"
+            "saw little change. That's the veteran opening.\n\n"
+            "1. **Decompose the job into tasks.** O*NET has the taxonomy. Which tasks\n"
+            "   are AI-substitutable (routine, well-defined output)? Which are\n"
+            "   AI-complementary (judgment, context, ambiguity)?\n"
+            "2. **Target roles where AI is a complement, not a substitute.** Agent\n"
+            "   supervision IS the archetype: the human role EXISTS because AI exists.\n"
+            "3. **Ask: what did this role look like in 2023?** If the answer is\n"
+            "   'didn't exist,' you're in the right zone. AI-complementary roles\n"
+            "   are still being invented.\n"
+            "4. **Economic upside check:** total comp × headcount × growth rate.\n"
+            "   A role paying $65K with 500K openings growing 20%/year is a market.\n"
+            "   A role paying $200K with 50 openings total is not.\n\n"
+            "_\"The Turing Trap: if we only measure AI by whether it replaces humans,\n"
+            "we'll miss the much bigger opportunity of AI complementing humans.\"_"
+        )
+
+    if any(w in sit for w in ["market", "size", "tam", "opportunity", "demand"]):
+        return (
+            "**Brynjolfsson: Size the market, don't hand-wave it.**\n\n"
+            "Before pitching LearnAIR scale, pressure-test the numbers:\n\n"
+            "1. **Bottom-up, not top-down.** Not 'AI is a $15T market.' Instead:\n"
+            "   'X companies, each hiring Y AI-supervisors at $Z salary, growing W%.'\n"
+            "2. **Substitution + complementation.** Roles AI destroys = reskill supply.\n"
+            "   Roles AI creates = demand. You need both sides to close the gap.\n"
+            "3. **Productivity paradox:** tech diffusion takes years. The job-posting\n"
+            "   data lags reality by 6-18 months. Look for leading indicators: talent\n"
+            "   job descriptions on LinkedIn, partnership announcements, Copilot usage.\n"
+            "4. **Who pays?** Employers pay for reskilling when the savings > cost.\n"
+            "   Savings = (reduced AI oversight failures) + (higher AI leverage per worker).\n"
+            "   If you can't compute this in dollars, the employer can't either.\n\n"
+            "_\"The benefits of general-purpose technologies take decades to fully\n"
+            "materialize. But the winners show up early.\"_"
+        )
+
+    if any(w in sit for w in ["employer", "roi", "business case", "pitch", "sell"]):
+        return (
+            "**Brynjolfsson: The employer ROI frame.**\n\n"
+            "When Mike pitches an employer, the frame isn't 'veterans are great.'\n"
+            "It's: 'AI deployment without supervised humans fails 40% of the time.\n"
+            "Our graduates cut that failure rate.'\n\n"
+            "1. **Quantify the failure mode.** What does an AI deployment without\n"
+            "   trained supervision cost? Downtime, compliance breaches, customer\n"
+            "   churn, hallucination-based decisions. Name a number.\n"
+            "2. **Quantify the gain.** A trained supervisor prevents X% of failures,\n"
+            "   catches Y% of drift, accelerates Z% of adoption. Pilot data > theory.\n"
+            "3. **Substitute vs complement framing.** Don't pitch 'human replaces\n"
+            "   AI' (employer won't buy). Pitch 'human multiplies AI' (employer will).\n"
+            "4. **Reference the J-curve.** Productivity gains from new tech lag\n"
+            "   investment by 5-10 years. Employers who invest in trained supervision\n"
+            "   now get the curve earlier.\n\n"
+            "_\"AI benefits go to firms that invest in the complements: organizational\n"
+            "capital, human capital, process redesign.\"_"
+        )
+
+    return (
+        "**Brynjolfsson: Market and economic framing.**\n\n"
+        "Mike's frame for Brynjolfsson: Market → target roles with economic upside.\n\n"
+        "Tell me what you're evaluating. I can help with:\n\n"
+        "- **Role targeting** — complement not substitute, where AI creates work\n"
+        "- **Market sizing** — bottom-up numbers, leading indicators\n"
+        "- **Employer ROI** — failure cost, gain quantification, J-curve framing\n\n"
+        "Say: 'brynjolfsson: which roles should we target' or\n"
+        "'brynjolfsson: how do I pitch this to an employer'.\n\n"
+        "_Erik Brynjolfsson runs Stanford's Digital Economy Lab. His work on the\n"
+        "Turing Trap argues the biggest AI opportunity is augmentation, not automation._"
+    )
+
+
+# --- Tool: nadella (Satya Nadella) ---
+
+def nadella(situation: str) -> str:
+    """Apply Nadella's frame: Environment — train inside real workflows.
+
+    Microsoft CEO. Hit Refresh, Copilot, cultural transformation of a 200K-person
+    org. His pattern: meet people where they already work, build on platforms they
+    already use, lead with empathy and growth mindset. Use this when designing
+    how the program lives inside an employer, not alongside it.
+
+    Args:
+        situation: What you're shaping. Examples: 'how does this work inside a company',
+                   'how do I change a skeptical team', 'do we build our own tool or use theirs'.
+    """
+    sit = situation.lower()
+
+    if any(w in sit for w in ["workflow", "inside", "embed", "integrate", "tool", "platform"]):
+        return (
+            "**Nadella: Meet work where it already happens.**\n\n"
+            "Copilot's bet wasn't 'use AI in a separate app.' It was 'put AI inside\n"
+            "Word, Excel, Teams — the tools 400M people already open every morning.'\n"
+            "Same rule for LearnAIR:\n\n"
+            "1. **Don't build a new workflow. Embed in the existing one.** If the\n"
+            "   veteran is going to supervise agents in Slack/Salesforce/Zendesk,\n"
+            "   train in Slack/Salesforce/Zendesk. Not in a LearnAIR sandbox.\n"
+            "2. **Friction kills adoption.** Every new tab, every new login, every\n"
+            "   new interface is friction. The program should feel like a layer on\n"
+            "   the work, not a replacement for it.\n"
+            "3. **The platform play:** what's the 'Microsoft Graph' for veteran\n"
+            "   supervision? A shared dataset, a shared API, a shared set of\n"
+            "   evaluation tools that compound across employers. Plan for it.\n"
+            "4. **Real work beats simulation.** A fake support ticket is not a\n"
+            "   real support ticket. Push cohorts into live (but gated) production\n"
+            "   as fast as safety allows.\n\n"
+            "_\"Our industry does not respect tradition, only innovation.\"\n"
+            "Corollary: learners don't respect curriculum, only real work._"
+        )
+
+    if any(w in sit for w in ["culture", "change", "skeptical", "resist", "transform"]):
+        return (
+            "**Nadella: Culture change starts with empathy.**\n\n"
+            "When Nadella took over Microsoft, the org was fixed-mindset, siloed,\n"
+            "defensive. He didn't reorganize it — he changed the mindset, then the\n"
+            "structure followed. For Mike walking into skeptical employers or a\n"
+            "resistant LearnAIR team:\n\n"
+            "1. **Start with empathy.** What is the skeptic afraid of? Being replaced?\n"
+            "   Being exposed? Being irrelevant? Until you know, your pitch will\n"
+            "   bounce off.\n"
+            "2. **Growth mindset framing.** 'Learn-it-all, not know-it-all.' Position\n"
+            "   AI supervision as something smart people GROW INTO, not something\n"
+            "   veterans happen to do because they can't do anything else.\n"
+            "3. **Show, don't declare.** A live demo of a supervised agent workflow\n"
+            "   changes more minds than a deck about the future of work.\n"
+            "4. **Give them a role in the change.** Skeptics become champions when\n"
+            "   they're the ones running the pilot, not watching it.\n"
+            "5. **Patience at scale, urgency at the unit.** The industry moves in\n"
+            "   years. Your pilot moves in weeks. Don't confuse the two cadences.\n\n"
+            "_\"Empathy is not a soft skill. It's the hardest skill we learn.\"_"
+        )
+
+    if any(w in sit for w in ["build", "own", "tool", "should we", "make", "create"]):
+        return (
+            "**Nadella: Build the platform, not the product.**\n\n"
+            "When deciding whether to build your own tool or use an existing one:\n\n"
+            "1. **Where's the commodity layer?** If the capability is commodity\n"
+            "   (LLM access, eval frameworks, basic dashboards), USE the commodity.\n"
+            "   Don't rebuild what's already cheap.\n"
+            "2. **Where's the differentiation?** For LearnAIR, differentiation is\n"
+            "   the training loop, the labeled veteran-supervisor dataset, the\n"
+            "   employer-specific eval suites. Build THERE.\n"
+            "3. **Platform mindset:** design whatever you build so OTHERS can\n"
+            "   build on top. Partners are free distribution; partners are also\n"
+            "   free product development.\n"
+            "4. **Default to integration.** Write a connector before you write a\n"
+            "   new app. Every connector you ship expands your surface area.\n\n"
+            "_\"Partner, then build.\" Nadella built Linux support into Azure before\n"
+            "he shipped any new Microsoft tool. Compete where you're differentiated;\n"
+            "partner everywhere else._"
+        )
+
+    return (
+        "**Nadella: Environment and real workflows.**\n\n"
+        "Mike's frame for Nadella: Environment → train inside real workflows.\n\n"
+        "Tell me what you're shaping. I can help with:\n\n"
+        "- **Workflow embedding** — meet work where it happens, no new interfaces\n"
+        "- **Culture change** — empathy first, growth mindset, show don't declare\n"
+        "- **Build vs partner** — platform thinking, commodity vs differentiation\n\n"
+        "Say: 'nadella: how do we embed this inside an employer' or\n"
+        "'nadella: the LearnAIR team is skeptical of the pivot'.\n\n"
+        "_Satya Nadella runs Microsoft. His transformation playbook: empathy,\n"
+        "growth mindset, platforms over products, meet work where it lives._"
+    )
+
+
+# --- Tool: mattis (Jim Mattis) ---
+
+def mattis(situation: str) -> str:
+    """Apply Mattis's frame: Leadership — clear intent, judgment in ambiguity.
+
+    4-star general, former SecDef. Call Sign Chaos. His pattern: commander's
+    intent (what and why, not how), decision-making under uncertainty, reading
+    as a leader's discipline, pre-mortems. Use this when you need to lead
+    a team, run a hard decision, or hold the line under pressure.
+
+    Args:
+        situation: What you're leading. Examples: 'how do I brief Mike for Justin's call',
+                   'I need to make this decision and don't have full information',
+                   'my team isn't moving together'.
+    """
+    sit = situation.lower()
+
+    if any(w in sit for w in ["brief", "instruct", "delegate", "hand off", "intent"]):
+        return (
+            "**Mattis: Commander's Intent.**\n\n"
+            "Mattis's single most-copied leadership pattern: give the WHAT and\n"
+            "the WHY, not the HOW. Subordinates who own the how adapt when reality\n"
+            "doesn't match the plan. Subordinates who execute the how are paralyzed\n"
+            "the moment the plan breaks.\n\n"
+            "Three sentences, in order:\n\n"
+            "1. **Purpose.** Why are we doing this? What's the mission? One sentence.\n"
+            "2. **Key tasks.** What has to happen for the mission to succeed?\n"
+            "   2-4 bullets, not 20.\n"
+            "3. **End state.** What does 'done' look like? How will we know?\n\n"
+            "Then: **decision authorities.** Who decides what, without asking you?\n"
+            "If every decision routes through you, you're the bottleneck.\n\n"
+            "**Test the brief:** ask the other person to repeat it back. If they\n"
+            "can't, you didn't brief — you talked.\n\n"
+            "_\"Don't fight for the plan. Fight for the mission. Plans are\n"
+            "disposable. Missions are not.\"_"
+        )
+
+    if any(w in sit for w in ["decision", "decide", "choose", "uncertain", "ambiguity", "unclear"]):
+        return (
+            "**Mattis: Decide under ambiguity.**\n\n"
+            "Mattis: there are three kinds of decisions, and they need different\n"
+            "tempos:\n\n"
+            "1. **Routine decisions:** low stakes, reversible, decide fast, move on.\n"
+            "   If it takes more than 10 minutes, you're overthinking.\n"
+            "2. **Consequential decisions:** medium stakes, mostly reversible.\n"
+            "   Gather inputs, write it down, decide, communicate the reasoning.\n"
+            "   48 hours max.\n"
+            "3. **Crisis decisions:** high stakes, irreversible, under time pressure.\n"
+            "   This is where training matters. Apply the OODA loop:\n"
+            "   Observe → Orient → Decide → Act. Speed matters more than perfection.\n\n"
+            "**The 70% rule:** in combat, decide with 70% of the information.\n"
+            "100% means you're too late. 40% means you're guessing. 70% is the\n"
+            "sweet spot where judgment has enough to work with.\n\n"
+            "**Pre-mortem before you decide:** 'It's 30 days from now and this\n"
+            "decision failed. What went wrong?' Answer honestly. If you can't name\n"
+            "three failure modes, you haven't thought about it enough.\n\n"
+            "_\"You cannot allow any of your people to avoid the brutal facts.\n"
+            "If they start living in a dream world, it's going to be bad.\"_"
+        )
+
+    if any(w in sit for w in ["team", "morale", "together", "unit", "cohesion", "not moving"]):
+        return (
+            "**Mattis: Build a team that moves as one.**\n\n"
+            "Mattis's Marine Corps rule: units fight the way they train. If the\n"
+            "unit isn't moving together, the training is the problem, not the people.\n\n"
+            "1. **Know each person's strengths and where they break.** A leader\n"
+            "   who doesn't know their team is not a leader. Spend the 1:1 time.\n"
+            "2. **Standards, not preferences.** 'On time' is a standard. 'Professional\n"
+            "   communication' is a standard. Enforce them uniformly or don't enforce\n"
+            "   them at all.\n"
+            "3. **Share the work AND the recognition.** The leader eats last. If\n"
+            "   your team sees you take hard work and give away credit, they follow.\n"
+            "   If they see the opposite, they fake it.\n"
+            "4. **Drill the 3 things that must go right.** Not 30. Three. Drill\n"
+            "   them until they're muscle memory. Everything else is improv.\n"
+            "5. **Debrief every engagement.** Win or lose, the after-action review\n"
+            "   is where the unit actually learns. Skip it and the unit stops improving.\n\n"
+            "_\"Be polite, be professional, but have a plan to execute.\"\n"
+            "The plan is what separates hope from leadership._"
+        )
+
+    if any(w in sit for w in ["read", "study", "prepare", "learn", "book"]):
+        return (
+            "**Mattis: Reading is a leader's discipline.**\n\n"
+            "Mattis: \"If you haven't read hundreds of books, you are functionally\n"
+            "illiterate, and you will be incompetent, because your personal\n"
+            "experiences alone aren't broad enough to sustain you.\"\n\n"
+            "1. **Read on the domain before you lead in it.** If Mike's leading\n"
+            "   veteran AI supervision, he should have read 20 books on workforce\n"
+            "   transitions, 20 on AI, 20 on veterans. Not skimmed. Read.\n"
+            "2. **Read history, not just how-to.** How-to books teach you the\n"
+            "   current playbook. History teaches you when the current playbook breaks.\n"
+            "3. **Read your adversaries, not just your allies.** To lead a program,\n"
+            "   read the critics of the program hardest.\n"
+            "4. **Read before every major engagement.** Mattis read the history\n"
+            "   of Anbar before he went to Anbar. Mike should read the history of\n"
+            "   veteran reskilling programs before he pitches a new one.\n\n"
+            "_\"Any problem that I encountered as a general had almost certainly\n"
+            "been encountered by someone else, somewhere. And it had been written down.\"_"
+        )
+
+    return (
+        "**Mattis: Leadership under ambiguity.**\n\n"
+        "Mike's frame for Mattis: Leadership → clear intent, structured thinking,\n"
+        "judgment in ambiguity and complexity.\n\n"
+        "Tell me what you're leading. I can help with:\n\n"
+        "- **Briefing** — commander's intent, purpose/key tasks/end state\n"
+        "- **Decisions** — three tempos, 70% rule, pre-mortem\n"
+        "- **Team cohesion** — know your people, standards, drill the three things\n"
+        "- **Study** — reading as a leadership discipline\n\n"
+        "Say: 'mattis: how do I brief this' or 'mattis: I have to decide\n"
+        "by Friday and I don't have enough information'.\n\n"
+        "_Jim Mattis commanded Marines in Iraq and Afghanistan, served as SecDef.\n"
+        "His pattern: clarity of intent, tolerance for ambiguity, reading as discipline._"
+    )
+
+
+# --- Tool: priestley (Daniel Priestley) ---
+
+def priestley(situation: str) -> str:
+    """Apply Priestley's frame: Positioning — create scarcity and demand.
+
+    Author of Key Person of Influence, Oversubscribed, 24 Assets. His pattern:
+    oversubscribed > underselling, KPI identity (pitch/publish/product/profile/
+    partnership), ascending transaction model. Use this when positioning an
+    offer, designing cohort scarcity, or building a market presence.
+
+    Args:
+        situation: What you're positioning. Examples: 'how do we price the cohort',
+                   'we keep chasing prospects', 'how does Mike become known in this space'.
+    """
+    sit = situation.lower()
+
+    if any(w in sit for w in ["ladder", "ticket", "ascending", "transaction", "ramp"]):
+        return (
+            "**Priestley: The ascending transaction model.**\n\n"
+            "Don't sell the $45K pilot to a cold prospect. Build a ladder:\n\n"
+            "1. **Free gift:** free ebook, free assessment, free 30-min consult.\n"
+            "   Costs you a bit, earns you contact info and trust.\n"
+            "2. **Low-ticket ($50-$500):** a paid workshop, a report, a workbook.\n"
+            "   The first dollar is the hardest. Once paid, the relationship changes.\n"
+            "3. **Mid-ticket ($2K-$10K):** a focused program, a small consulting\n"
+            "   engagement, a ticketed event.\n"
+            "4. **High-ticket ($25K-$100K+):** the 90-day pilot, the annual program,\n"
+            "   the enterprise partnership.\n\n"
+            "Each rung qualifies the next. By the time someone pays you $45K, they\n"
+            "have already given you a dollar, read your work, attended something.\n"
+            "Zero surprises.\n\n"
+            "**Veteran program application:** the 90-day pilot is the high-ticket.\n"
+            "What's the free offer? What's the $500 offer? If those don't exist,\n"
+            "every sale is starting from zero.\n\n"
+            "_\"Don't sell the high-ticket to strangers. Sell the free gift, the\n"
+            "low-ticket, then the high-ticket — in that order.\"_"
+        )
+
+    if any(w in sit for w in ["scarcity", "demand", "oversubscribe", "price", "pricing", "cohort", "offer"]):
+        return (
+            "**Priestley: Design for oversubscribed, not full.**\n\n"
+            "Core principle: 11 people want the 10 spots. Not 10 people for 11 spots.\n"
+            "The difference is everything.\n\n"
+            "1. **Fixed capacity, finite window.** A 90-day cohort with 12 seats,\n"
+            "   starting June 1. Not 'rolling enrollment.' Not 'we'll take as many\n"
+            "   as apply.' Scarcity is a feature, not a constraint.\n"
+            "2. **Signal demand before opening supply.** Waitlist, application,\n"
+            "   discovery call. If the first 20 applicants get in without\n"
+            "   competition, you priced the program wrong.\n"
+            "3. **Why oversubscribed works:** buyers trust things others want.\n"
+            "   Empty cohort = suspicious. Full cohort with a waitlist = credible.\n"
+            "4. **For employers specifically:** 'we're taking 3 partner companies\n"
+            "   for the pilot cohort' beats 'we'll work with anyone who pays.'\n"
+            "   Exclusivity invites commitment.\n\n"
+            "_\"The most beautiful word in business isn't 'yes.' It's 'waitlist.'\"_"
+        )
+
+    if any(w in sit for w in ["known", "visible", "brand", "presence", "publish", "profile", "5 p", "5 p's"]):
+        return (
+            "**Priestley: The 5 P's of Key Person of Influence.**\n\n"
+            "To become the obvious person in a space, you need all five. Missing\n"
+            "one is fine; missing three is invisibility.\n\n"
+            "1. **Pitch.** Can you explain what you do in 30 seconds so a 12-year-old\n"
+            "   gets it? 'We train veterans to supervise AI agents in enterprise\n"
+            "   workflows.' Say it until it's automatic.\n"
+            "2. **Publish.** Weekly. Same channel. Same angle. LinkedIn essay,\n"
+            "   Substack, podcast — pick one and compound. Your archive is your moat.\n"
+            "3. **Product.** A real thing people can buy. Cohort, playbook, ebook,\n"
+            "   keynote. Not 'consulting hours.' Productized.\n"
+            "4. **Profile.** Google yourself. What shows up? If it's LinkedIn and\n"
+            "   nothing else, you're invisible. Podcasts, interviews, guest posts,\n"
+            "   conference talks. Build the trail.\n"
+            "5. **Partnership.** Other KPIs. They amplify you, you amplify them.\n"
+            "   A podcast appearance with a bigger-name host is worth 100 cold emails.\n\n"
+            "**For Mike:** he has the pitch seed. He needs to publish (weekly, one\n"
+            "channel). Product comes from the first cohort. Profile builds from\n"
+            "publishing. Partnership comes last.\n\n"
+            "_\"If you're not known, you're guessing at every sale.\"_"
+        )
+
+    if any(w in sit for w in ["niche", "positioning", "different", "unique", "stand out"]):
+        return (
+            "**Priestley: Niche down, then niche down again.**\n\n"
+            "'AI workforce training' is not a niche. 'Veteran AI supervisors for\n"
+            "mid-market healthcare operations' is a niche.\n\n"
+            "1. **Narrow the who.** Who exactly? Not 'enterprise.' Name the segment,\n"
+            "   size, geography, industry.\n"
+            "2. **Narrow the what.** What specific outcome? Not 'better AI.' Name\n"
+            "   the metric: reduced false positives, faster onboarding, compliance.\n"
+            "3. **Narrow the how.** What's your unfair advantage? Not 'we're good.'\n"
+            "   Name it: Marine Corps training methodology, veteran network,\n"
+            "   proprietary eval suite.\n"
+            "4. **Own the category.** If the category doesn't exist, name it.\n"
+            "   'Agent supervision' was named before it was an industry; now it's\n"
+            "   an industry.\n\n"
+            "_\"Riches are in the niches. Generalists commoditize.\"_"
+        )
+
+    return (
+        "**Priestley: Positioning and scarcity.**\n\n"
+        "Mike's frame for Priestley: Positioning → create scarcity and demand.\n\n"
+        "Tell me what you're positioning. I can help with:\n\n"
+        "- **Scarcity design** — oversubscribed cohorts, fixed capacity, waitlists\n"
+        "- **5 P's of KPI** — pitch, publish, product, profile, partnership\n"
+        "- **Ascending ladder** — free gift → low → mid → high ticket\n"
+        "- **Niche discipline** — narrow the who/what/how, own the category\n\n"
+        "Say: 'priestley: how do we price the cohort' or\n"
+        "'priestley: how does Mike become known in this space'.\n\n"
+        "_Daniel Priestley wrote Key Person of Influence and Oversubscribed.\n"
+        "His core insight: pull beats push. Build demand, let buyers come to you._"
+    )
+
+
 # --- Tool: discover ---
 
 def _search_dirs() -> list[Path]:

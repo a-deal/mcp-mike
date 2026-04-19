@@ -56,6 +56,12 @@ If you get a concept question, you're live.
 | "duke: review this message before I send it" | Proposals not declarations, recipient space |
 | "k: am I converging or diverging" | Convergence check, sequencing, systems thinking |
 | "k: evening synthesis" | What stood out, what compounds, tomorrow's top 3 |
+| **Thinker Workstation (your top 5)** | |
+| "ng: designing module 1 practice" | SKILL — execution-first, output-based projects |
+| "brynjolfsson: which roles should we target" | MARKET — complement not substitute, employer ROI |
+| "nadella: how do we embed this in a workflow" | ENVIRONMENT — meet work where it lives, platforms |
+| "mattis: how do I brief on this" | LEADERSHIP — commander's intent, 70% rule, reading |
+| "priestley: how do we price the cohort" | POSITIONING — oversubscribed, 5 P's, ladder |
 | **Daily Operations** | |
 | "load nexus" | Loads a persona from your workspace |
 | "what's next" | Scans all projects for TODOs |

@@ -26,6 +26,11 @@ from mcp_mike.tools import (
     mochary,
     duke,
     komoroske,
+    ng,
+    brynjolfsson,
+    nadella,
+    mattis,
+    priestley,
     whats_next,
     save_note,
     _get_progress,
@@ -364,6 +369,116 @@ def test_komoroske_build():
 def test_komoroske_default():
     result = komoroske("help")
     assert "systems thinking" in result.lower()
+
+
+# --- ng (Andrew Ng — Skill) ---
+
+def test_ng_practice_design():
+    result = ng("designing module 1 practice for learners")
+    assert "project" in result.lower()
+    assert "error analysis" in result.lower() or "baby step" in result.lower() or "ship" in result.lower()
+
+def test_ng_curriculum():
+    result = ng("how do I design the curriculum for this module")
+    assert "output" in result.lower()
+    assert "day 1" in result.lower() or "graduate" in result.lower() or "decompose" in result.lower()
+
+def test_ng_data():
+    result = ng("what data should the cohort work with")
+    assert "data" in result.lower()
+    assert "real" in result.lower() or "label" in result.lower()
+
+def test_ng_default():
+    result = ng("help")
+    assert "execution-first" in result.lower() or "skill" in result.lower()
+
+
+# --- brynjolfsson (Erik Brynjolfsson — Market) ---
+
+def test_brynjolfsson_roles():
+    result = brynjolfsson("which roles should we target")
+    assert "complement" in result.lower() or "substitute" in result.lower()
+    assert "task" in result.lower() or "o*net" in result.lower()
+
+def test_brynjolfsson_market_size():
+    result = brynjolfsson("is the market big enough for this program")
+    assert "bottom-up" in result.lower() or "size" in result.lower()
+
+def test_brynjolfsson_employer_roi():
+    result = brynjolfsson("how do I pitch the ROI to an employer")
+    assert "roi" in result.lower() or "failure" in result.lower() or "quantif" in result.lower()
+
+def test_brynjolfsson_default():
+    result = brynjolfsson("help")
+    assert "market" in result.lower() or "economic" in result.lower()
+
+
+# --- nadella (Satya Nadella — Environment) ---
+
+def test_nadella_workflow():
+    result = nadella("how do we embed this inside an employer's workflow")
+    assert "workflow" in result.lower() or "embed" in result.lower() or "copilot" in result.lower()
+
+def test_nadella_culture():
+    result = nadella("the team is skeptical and resistant to the pivot")
+    assert "empathy" in result.lower()
+    assert "growth mindset" in result.lower() or "mindset" in result.lower()
+
+def test_nadella_build_vs_partner():
+    result = nadella("should we build our own tool or use theirs")
+    assert "platform" in result.lower() or "commodity" in result.lower() or "partner" in result.lower()
+
+def test_nadella_default():
+    result = nadella("help")
+    assert "environment" in result.lower() or "workflow" in result.lower()
+
+
+# --- mattis (Jim Mattis — Leadership) ---
+
+def test_mattis_brief():
+    result = mattis("how do I brief Mike on this hand-off")
+    assert "commander's intent" in result.lower() or "intent" in result.lower()
+    assert "purpose" in result.lower() or "end state" in result.lower()
+
+def test_mattis_decision():
+    result = mattis("I need to decide by Friday and don't have full info")
+    assert "70%" in result or "pre-mortem" in result.lower() or "ooda" in result.lower()
+
+def test_mattis_team():
+    result = mattis("my team isn't moving together")
+    assert "standards" in result.lower() or "drill" in result.lower() or "debrief" in result.lower()
+
+def test_mattis_reading():
+    result = mattis("what should I read before leading this program")
+    assert "read" in result.lower()
+    assert "history" in result.lower() or "book" in result.lower()
+
+def test_mattis_default():
+    result = mattis("help")
+    assert "leadership" in result.lower() or "intent" in result.lower()
+
+
+# --- priestley (Daniel Priestley — Positioning) ---
+
+def test_priestley_scarcity():
+    result = priestley("how do we price the 90-day cohort")
+    assert "oversubscribed" in result.lower() or "scarcity" in result.lower() or "waitlist" in result.lower()
+
+def test_priestley_profile():
+    result = priestley("how does Mike become known in this space")
+    assert "pitch" in result.lower() or "publish" in result.lower() or "profile" in result.lower()
+
+def test_priestley_ladder():
+    result = priestley("what's the right pricing ladder for this offer")
+    assert "ladder" in result.lower() or "ticket" in result.lower() or "ascending" in result.lower()
+
+def test_priestley_niche():
+    result = priestley("our positioning feels too broad, how do we stand out")
+    assert "niche" in result.lower() or "narrow" in result.lower() or "category" in result.lower()
+
+def test_priestley_default():
+    result = priestley("help")
+    assert "positioning" in result.lower() or "scarcity" in result.lower()
 
 
 # --- discover ---
