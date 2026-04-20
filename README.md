@@ -1,8 +1,10 @@
 # Mike's Workspace Tools
 
-Claude Desktop with superpowers. 13 tools that replace your manual workflows: find files anywhere on your machine, organize them into projects, learn with spaced repetition, prep for meetings, check your decisions, and share progress with Andrew.
+Claude Desktop with superpowers. 18 tools that replace your manual workflows: find files anywhere on your machine, organize them into projects, learn with spaced repetition, prep for meetings, check your decisions, lean on five thinker personas for framing, and share progress with Andrew.
 
-You don't type commands. You talk to Claude and it uses the tools when relevant. Or ask directly: "quiz me on learnair," "find files about Teresa," "mochary: prep for my call with Justin."
+You don't type commands. You talk to Claude and it uses the tools when relevant. Or ask directly: "quiz me on cli," "find files about Teresa," "mochary: prep for my call with Justin," "ng: how do I design module 1 practice."
+
+> **Starting the week of April 27:** we're running the Alpha School model together. See [`mike-alpha-plan.md`](./mike-alpha-plan.md) for the full structure. Start there if you're picking this repo up for the first time this week.
 
 ## One-Time Setup (15 minutes)
 
@@ -69,17 +71,24 @@ If you get a concept question, you're live.
 
 ## The Goal
 
-Everything leads to the capstone: build the Module 1 delivery agent for the LearnAIR curriculum. 65 concepts across 4 tracks prepare you for it. Open the workstation to see the full map:
+Starting the week of April 27, you're running the Alpha School model on yourself. The first capstone is **your own job-search agent** (resume customizer + cover letter drafter + LinkedIn outreach helper). Four-week arc. The full plan, daily structure, weekly 1:1 format, and gate criteria are in [`mike-alpha-plan.md`](./mike-alpha-plan.md).
 
-**[andrewdeal.info/learnair/workstation](https://andrewdeal.info/learnair/workstation)**
+The spaced-rep deck has 80 concepts across 5 tracks: `claude` (Desktop), `cli` (bridge to Claude Code), `learnair` (domain knowledge), `internet` (technical foundations), and `capstone` (project-specific).
 
-## Daily Routine (1 hour)
+**[andrewdeal.info/learnair/workstation](https://andrewdeal.info/learnair/workstation)** has the full concept map if you want the visual.
 
-1. Open the workstation. Read the next concept.
-2. Open Claude Desktop. Do the practice exercise.
-3. "quiz me on [track]" for spaced review.
-4. "save a note to learning: [what clicked]"
-5. "share my progress" to checkpoint.
+## Daily Routine (Alpha Week, 90 min)
+
+Once you're in the Alpha week starting April 27:
+
+1. **Dash (3 min)** — "show my progress" to orient
+2. **Quiz (17 min)** — "quiz me on cli" (or any track). Mark honestly.
+3. **Confusion sweep (5 min)** — for anything marked wrong, take one concrete action
+4. **Project block (55 min)** — work on your job-search agent. One step forward per session.
+5. **Log (5 min)** — "save a note to learning: today I built X, got stuck on Y, fixed by Z"
+6. **Checkpoint (5 min)** — "share my progress" so Andrew sees it
+
+Full detail in [`mike-alpha-plan.md`](./mike-alpha-plan.md).
 
 ## Updating
 
