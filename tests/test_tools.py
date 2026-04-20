@@ -244,6 +244,22 @@ def test_quiz_me_internet_track():
     assert found, f"Expected an internet concept in: {result[:200]}"
 
 
+def test_quiz_me_cli_track():
+    result = quiz_me("cli")
+    cli_names = [c["name"] for c in CONCEPTS if c.get("track") == "cli"]
+    assert len(cli_names) >= 15, "CLI track should have at least 15 concepts"
+    found = any(name.lower() in result.lower() for name in cli_names)
+    assert found, f"Expected a CLI concept in: {result[:200]}"
+
+
+def test_cli_concepts_have_confused_field():
+    """CLI track concepts should include 'confused' explanations like learnair."""
+    cli_concepts = [c for c in CONCEPTS if c.get("track") == "cli"]
+    with_confused = [c for c in cli_concepts if "confused" in c]
+    assert len(with_confused) == len(cli_concepts), \
+        f"All CLI concepts should have 'confused'; {len(cli_concepts) - len(with_confused)} missing"
+
+
 def test_quiz_me_invalid_track():
     result = quiz_me("nonexistent")
     assert "no concepts found" in result.lower()

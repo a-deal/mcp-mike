@@ -145,8 +145,9 @@ def quiz_me(track: str = "") -> str:
     then new concepts in tier order.
 
     Args:
-        track: Optional filter. 'claude' for Claude usage, 'learnair' for
-               domain knowledge, 'internet' for technical foundations.
+        track: Optional filter. 'claude' for Claude Desktop usage, 'cli' for
+               Claude Code CLI bridge, 'learnair' for domain knowledge,
+               'internet' for technical foundations.
                Empty string returns concepts from all tracks.
     """
     progress = _get_progress()
@@ -281,13 +282,13 @@ def progress(track: str = "") -> str:
     """Show learning progress across all tracks or a specific track.
 
     Args:
-        track: Optional filter. 'claude', 'learnair', 'internet', or empty for all.
+        track: Optional filter. 'claude', 'cli', 'learnair', 'internet', or empty for all.
     """
     prog = _get_progress()
     track_lower = track.lower().strip()
 
     # Group concepts by track
-    tracks: dict[str, list[dict]] = {"claude": [], "learnair": [], "internet": [], "capstone": []}
+    tracks: dict[str, list[dict]] = {"claude": [], "cli": [], "learnair": [], "internet": [], "capstone": []}
     for c in CONCEPTS:
         t = c.get("track", "claude")
         if t not in tracks:
@@ -295,7 +296,7 @@ def progress(track: str = "") -> str:
         tracks[t].append(c)
 
     if track_lower and track_lower not in tracks:
-        return f"Unknown track '{track}'. Available: claude, learnair, internet."
+        return f"Unknown track '{track}'. Available: claude, cli, learnair, internet."
 
     target_tracks = {track_lower: tracks[track_lower]} if track_lower else tracks
     lines = []
@@ -1386,7 +1387,7 @@ def checkpoint() -> str:
 
     # --- Gather progress ---
     prog = _get_progress()
-    tracks: dict[str, list[dict]] = {"claude": [], "learnair": [], "internet": [], "capstone": []}
+    tracks: dict[str, list[dict]] = {"claude": [], "cli": [], "learnair": [], "internet": [], "capstone": []}
     for c in CONCEPTS:
         t = c.get("track", "claude")
         if t not in tracks:
