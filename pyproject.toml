@@ -16,6 +16,7 @@ dev = ["pytest"]
 
 [project.scripts]
 mcp-mike = "mcp_mike.server:main"
+quiz-cli = "mcp_mike.quiz_cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
