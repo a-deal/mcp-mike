@@ -1,5 +1,7 @@
 # Mike's Workspace Tools
 
+> **SUNSET 2026-04-29:** Mike-deal collaborator relationship sunset; mcp-mike never installed. This repo is recorded history of the design exploration. Do not act on its contents as live state. See `hub/projects/archived/mike-learning-plan.md` and `hub/audits/2026-04-29-harness-pollution-audit.md`.
+
 Claude Desktop with superpowers. 18 tools that replace your manual workflows: find files anywhere on your machine, organize them into projects, learn with spaced repetition, prep for meetings, check your decisions, lean on five thinker personas for framing, and share progress with Andrew.
 
 You don't type commands. You talk to Claude and it uses the tools when relevant. Or ask directly: "quiz me on cli," "find files about Teresa," "mochary: prep for my call with Justin," "ng: how do I design module 1 practice."
